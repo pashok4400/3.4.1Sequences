@@ -5,7 +5,7 @@ object WalService {
     var chats: MutableList<Chat> = ArrayList<Chat>()
 
     fun createMessage(userOutId: Int, userInId: Int, text: String, messageID: Int = 0, isRead: Boolean = false) {
-        var chat: Chat? = chats.find {
+        val chat: Chat? = chats.find {
             !it.messages.filter {
                 it.userOutId == userOutId && it.userInId == userInId ||
                         it.userOutId == userInId && it.userInId == userOutId
@@ -22,7 +22,7 @@ object WalService {
             chat.countMessage++
             chats.add(chat.copy(chatId = 1))
         } else {
-            var mess: MutableList<Message> = ArrayList<Message>()
+            val mess: MutableList<Message> = mutableListOf()
             mess.add(
                 Message(
                     1, userOutId, userInId,
@@ -42,14 +42,8 @@ object WalService {
     }
 
     fun deleteMessage(chatId: Int, messageId: Int): Boolean {
-        var chat: Chat? = chats.find { it.chatId == chatId }
-        if (chat == null) {
-            return false
-        }
-        val mes: Message? = chat.messages.find { it.messageId == messageId }
-        if (mes == null) {
-            return false
-        }
+        val chat: Chat = chats.find { it.chatId == chatId } ?: return false
+        val mes: Message = chat.messages.find { it.messageId == messageId } ?: return false
         if (chat.messages.size == 1) {
             deleteChat(chatId)
             return true
@@ -68,20 +62,20 @@ object WalService {
     }
 
     fun getLastMessages(chatId: Int, lastId: Int, count: Int): List<Message> {
-        var res: MutableList<Message> = ArrayList()
+        val res: MutableList<Message> = ArrayList()
         var c = 0;
         chats.map{if(it.chatId == chatId) it.messages.map{if(it.messageId >= lastId && c <= count) {res.add(it); c++; it.isRead = true}}}
         return res
     }
 
     fun getMessages(): List<Message> {
-        var res: MutableList<Message> = ArrayList()
+        val res: MutableList<Message> = ArrayList()
         chats.map{it.messages.map{res.add(it)}}
         return res
     }
 
     fun getMessagesUser(userId: Int): List<Message> {
-        var res: MutableList<Message> = ArrayList()
+        val res: MutableList<Message> = ArrayList()
         chats.map{it.messages.map{if(it.userInId == userId) {res.add(it); it.isRead = true}}}
         return res
     }
@@ -89,11 +83,7 @@ object WalService {
     fun deleteChat(id: Int): Boolean {
         val oldChats = chats;
         chats = chats.filter { it.chatId != id } as MutableList<Chat>
-        if (chats.size < oldChats.size) {
-            return true
-        } else {
-            return false
-        }
+        return chats.size < oldChats.size
     }
 
     private fun createChat(chat: Chat) {
@@ -108,10 +98,10 @@ object WalService {
 
 data class Chat(
     val chatId: Int,
-    var messages: MutableList<Message>,
+    val messages: MutableList<Message>,
     val adminId: Int,
     var countMessage: Int = 0,
-    var countNoRed: Int
+    val countNoRed: Int
 )
 
 data class Message(
